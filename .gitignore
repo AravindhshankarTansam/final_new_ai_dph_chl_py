@@ -1,0 +1,98 @@
+# =========================
+# Python cache
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# =========================
+# Virtual environments
+# =========================
+venv/
+env/
+ENV/
+.venv/
+
+# =========================
+# Environment variables
+# =========================
+.env
+.env.*
+
+# =========================
+# Model & ML files
+# (VERY IMPORTANT – large files)
+# =========================
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.pth
+*.onnx
+*.sav
+
+# =========================
+# Temporary & uploads
+# =========================
+temp.jpg
+temp.png
+uploads/
+*.log
+
+# =========================
+# Flask specific
+# =========================
+instance/
+.webassets-cache
+
+# =========================
+# IDE & Editor
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Jupyter notebooks
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# Build & distribution
+# =========================
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# =========================
+# Testing
+# =========================
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+
+# =========================
+# Logs
+# =========================
+*.log
+logs/
+
+# =========================
+# Database
+# =========================
+*.sqlite3
+*.db
+
+# =========================
+# Docker
+# =========================
+docker-compose.override.yml
