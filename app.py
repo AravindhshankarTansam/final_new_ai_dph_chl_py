@@ -26,6 +26,12 @@ CLASS_TO_VALUE = {
     "above_4": 4.5
 }
 
+
+@app.route("/")
+def index():
+    return jsonify({"message": "Chlorine Detection API is running"}), 200
+
+
 # ================= API ROUTE =================
 @app.route("/predict", methods=["POST"])
 def predict():
