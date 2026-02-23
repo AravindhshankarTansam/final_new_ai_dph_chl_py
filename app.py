@@ -50,6 +50,12 @@ def convert_label_to_ppm(label):
         return None
 
 
+
+@app.route("/")
+def index():
+    return jsonify({"message": "Chlorine Detection API is running"}), 200
+
+
 # ================= API ROUTE =================
 @app.route("/predict", methods=["POST"])
 def predict():
