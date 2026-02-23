@@ -1,98 +1,68 @@
-# =========================
-# Python cache
-# =========================
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# =========================
-# Virtual environments
-# =========================
+# Virtual Environment
 venv/
 env/
 ENV/
-.venv/
+.venv
 
-# =========================
-# Environment variables
-# =========================
-.env
-.env.*
-
-# =========================
-# Model & ML files
-# (VERY IMPORTANT – large files)
-# =========================
-*.pkl
-*.joblib
-*.h5
-*.pt
-*.pth
-*.onnx
-*.sav
-
-# =========================
-# Temporary & uploads
-# =========================
-temp.jpg
-temp.png
-uploads/
-*.log
-
-# =========================
-# Flask specific
-# =========================
-instance/
-.webassets-cache
-
-# =========================
-# IDE & Editor
-# =========================
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
-# =========================
-# OS files
-# =========================
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Dataset folders (DO NOT UPLOAD IMAGES)
+chln_new_clean/
+cd_img_folder/
+dataset/
+data/
+*.jpg
+*.jpeg
+*.png
+*.gif
+
+# Model files (optional - uncomment if model is too large)
+# *.pkl
+
+# Temporary files
+*.log
+*.tmp
+temp/
+tmp/
+
+# OS
 .DS_Store
 Thumbs.db
 
-# =========================
-# Jupyter notebooks
-# =========================
-.ipynb_checkpoints/
+# Streamlit
+.streamlit/
 
-# =========================
-# Build & distribution
-# =========================
-build/
-dist/
-*.egg-info/
-.eggs/
-
-# =========================
 # Testing
-# =========================
+.pytest_cache/
 .coverage
 htmlcov/
-.tox/
-.pytest_cache/
-
-# =========================
-# Logs
-# =========================
-*.log
-logs/
-
-# =========================
-# Database
-# =========================
-*.sqlite3
-*.db
-
-# =========================
-# Docker
-# =========================
-docker-compose.override.yml
