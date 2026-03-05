@@ -6,7 +6,7 @@ from feature_extractor import extract_features
 app = Flask(__name__)
 
 # ================= LOAD =================
-model = joblib.load("ppm_classifier_gpu.pkl")
+model = joblib.load("chlorine_model.pkl")
 le = joblib.load("label_encoder.pkl")
 
 EXPECTED_FEATURES = model.n_features_in_
@@ -22,8 +22,8 @@ CLASS_TO_VALUE = {
     "2_to_2.5": 2.25,
     "2.5_to_3": 2.75,
     "3_to_3.5": 3.25,
-    "3.5_to_4": 3.75,
-    "above_4": 4.5
+    "3.5_to_4": 3.70,
+    "above_4": 3.8
 }
 
 # ================= API ROUTE =================

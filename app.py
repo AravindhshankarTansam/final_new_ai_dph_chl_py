@@ -1,124 +1,78 @@
-import os
-import re
-import cv2
+from fastapi import FastAPI, UploadFile, File, Request
+from fastapi.responses import JSONResponse
 import numpy as np
+import cv2
 import joblib
-from flask import Flask, request, jsonify
-from feature_extractor import extract_features
-
-app = Flask(__name__)
-
-# ================= LOAD MODEL =================
-model = joblib.load("ppm_classifier_gpu.pkl")
-le = joblib.load("label_encoder.pkl")
-EXPECTED_FEATURES = model.n_features_in_
-
-# ================= HAND DETECTION =================
-def is_hand_present(image_path):
-    img = cv2.imread(image_path)
-    if img is None:
-        return False
-
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-
-    lower = np.array([0, 30, 60], dtype=np.uint8)
-    upper = np.array([20, 150, 255], dtype=np.uint8)
-
-    mask = cv2.inRange(hsv, lower, upper)
-
-    kernel = np.ones((5, 5), np.uint8)
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-    mask = cv2.morphologyEx(mask, cv2.MORPH_DILATE, kernel)
-
-    skin_pixels = cv2.countNonZero(mask)
-    total_pixels = img.shape[0] * img.shape[1]
-    skin_ratio = skin_pixels / total_pixels
-
-    return skin_ratio > 0.08
 
 
-# ================= LABEL → DECIMAL PPM =================
-def convert_label_to_ppm(label):
-    nums = re.findall(r"\d*\.?\d+", label)
+from feature_extraction import extract_features
+from config import MODEL_PATH
 
-    if len(nums) == 1:
-        return float(nums[0])
-    elif len(nums) == 2:
-        low, high = map(float, nums)
-        return (low + high) / 2
-    else:
-        return None
+app = FastAPI()
 
+# ======================
+# Load Model
+# ======================
 
+model = joblib.load(MODEL_PATH)
+print("Model Loaded Successfully")
 
-@app.route("/")
-def index():
-    return jsonify({"message": "Chlorine Detection API is running"}), 200
+# ======================
+# Home Route
+# ======================
 
+@app.get("/")
+def home():
+    return {"message": "Chlorine Prediction API Running"}
 
-# ================= API ROUTE =================
-@app.route("/predict", methods=["POST"])
-def predict():
-    temp_path = "temp.jpg"
+# ======================
+# Prediction Route
+# ======================
+@app.post("/predict")
+async def predict(request: Request):
 
     try:
-        if "image" not in request.files:
-            return jsonify({"error": "No image uploaded"}), 400
+        form = await request.form()
 
-        file = request.files["image"]
+        if not form:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "No file uploaded"}
+            )
 
-        if file.filename == "":
-            return jsonify({"error": "Empty file"}), 400
+        # Get first uploaded file regardless of field name
+        file = list(form.values())[0]
 
-        file.save(temp_path)
+        contents = await file.read()
 
-        # Hand Detection
-        if is_hand_present(temp_path):
-            return jsonify({
-                "success": False,
-                "ppm": None,
-                "message": "Human hand detected. Please capture only the test tube."
-            })
+        np_img = np.frombuffer(contents, np.uint8)
+        img = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
 
-        # 🔥 Feature Extraction
-        feat = extract_features(temp_path)
+        if img is None:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Invalid image"}
+            )
 
-        if feat is None:
-            return jsonify({"error": "Feature extraction failed"}), 500
+        # Extract features
+        features = extract_features(img)
 
-        feat = np.array(feat, dtype=np.float32)
+        if features is None:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Feature extraction failed"}
+            )
 
-        if len(feat) != EXPECTED_FEATURES:
-            return jsonify({
-                "error": f"Feature mismatch. Expected {EXPECTED_FEATURES}, got {len(feat)}"
-            }), 500
+        features = np.array(features).reshape(1, -1)
 
-        feat = feat.reshape(1, -1)
+        prediction = model.predict(features)[0]
 
-        # 🔥 Prediction
-        pred = model.predict(feat)
-        label = le.inverse_transform(pred)[0]
+        chlorine_ppm = round(float(prediction), 2)
 
-        # 🔥 Convert to numeric PPM
-        ppm_value = convert_label_to_ppm(label)
-
-        if ppm_value is None:
-            return jsonify({"error": f"Invalid PPM label: {label}"}), 500
-
-        return jsonify({
-            "success": True,
-            "range": label,
-            "ppm": round(ppm_value, 2)
-        })
+        return {"ppm": chlorine_ppm}
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-    finally:
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
-
-
-# ================= RUN =================
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=False)
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
